@@ -1,0 +1,29 @@
+services:
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:v26.2.7
+    container_name: redpanda
+    command:
+      - redpanda
+      - start
+      - --mode=dev-container
+      - --smp=1
+      - --memory=1G
+      - --node-id=0
+      - --kafka-addr=internal://0.0.0.0:9092,external://0.0.0.0:19092
+      - --advertise-kafka-addr=internal://redpanda:9092,external://localhost:19092
+    ports:
+      - "19092:19092"
+    volumes:
+      - redpanda-data:/var/lib/redpanda/data
+
+  console:
+    image: docker.redpanda.com/redpandadata/console:v3.14.0
+    container_name: redpanda-console
+    depends_on: [redpanda]
+    environment:
+      KAFKA_BROKERS: redpanda:9092
+    ports:
+      - "8080:8080"
+
+volumes:
+  redpanda-data:
