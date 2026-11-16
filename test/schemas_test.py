@@ -24,3 +24,14 @@ def sample(minutes=0, load=100.0, fc=98.0, missing=False):
 def test_valid_roundtrip_json():
     s = sample()
     assert LoadSample.model_validate_json(s.model_dump_json()) == s
+
+
+def test_naive_timestamp_rejected():
+    with pytest.raises(ValidationError):
+        LoadSample(
+            ts_utc=datetime(2024, 1, 1),
+            load_mw=1,
+            forecast_mw=1,
+            is_missing=False,
+            source="replay",
+        )

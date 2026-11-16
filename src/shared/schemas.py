@@ -22,13 +22,13 @@ def _check_utc(ts: datetime) -> datetime:
     return ts.astimezone(UTC)
 
 
-class LoadSample(BaseModel):
+class LoadSample(_Base):
     "Message on topic `terna.load`"
 
     schema_version: int = 1
     ts_utc: datetime
-    load_mw: Optional[float] = Field(ge=0.0, allow_inf_nan=False)
-    forecast_mw: Optional[float] = Field(ge=0.0, allow_inf_nan=False)
+    load_mw: float | None = Field(ge=0.0, allow_inf_nan=False)
+    forecast_mw: float | None = Field(ge=0.0, allow_inf_nan=False)
     is_missing: bool
     source: Source
 
