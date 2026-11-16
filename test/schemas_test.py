@@ -1,5 +1,4 @@
-import datetime
-from datetime import UTC, datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 from pydantic import ValidationError
