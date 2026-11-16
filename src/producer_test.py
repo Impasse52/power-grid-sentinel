@@ -1,18 +1,31 @@
-import json
 import time
-from glob import glob
 
 import pandas as pd
 from confluent_kafka import Producer
 
+from shared.schemas import LoadSample, Source
+
 SPEED = 60
-files = glob("data/**.csv")
-df = pd.read_csv(files[0], parse_dates=["Date"])
+filename = "data/processed/terna_load.parquet"
+df = pd.read_parquet(filename)
+
 p = Producer({"bootstrap.servers": "localhost:19092"})
 
-for ts, load in zip(df["Date"], df["Total Load [MW]"]):
-    value = json.dumps({"ts": ts.isoformat(), "load_mw": float(load)})
-    p.produce("terna.load", key="IT", value=value)
+for ts, load, fc, is_missing in zip(
+    df.index,
+    df["total_load"],
+    df["forecast_total_load"],
+    df["is_missing"],
+):
+    value = LoadSample(
+        ts_utc=ts,
+        load_mw=load,
+        forecast_mw=fc,
+        is_missing=is_missing,
+        source=Source.REPLAY,
+    )
+
+    p.produce("terna.load", key="IT", value=value.model_dump_json())
     print("sent")
     p.poll(0)
     time.sleep(60)
