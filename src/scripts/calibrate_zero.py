@@ -18,3 +18,26 @@ print("MAD scale:", scale, "| std:", train["residual"].std())
 
 test_scores = test["residual"].abs() / scale
 print(test_scores.quantile([0.5, 0.9, 0.99, 0.999]), test_scores.max())
+
+for threshold in [3, 3.5, 4, 4.5]:
+    above = test_scores[test_scores > threshold]
+    days = above.index.normalize().nunique()
+    print(f"soglia={threshold}: {len(above)} campioni, {days} giorni")
+
+print(test.index.normalize().nunique())
+
+# df["score"] = df["residual"].abs() / scale
+# print(df.groupby(df.index.year)["score"].agg(["median", lambda s: s.quantile(0.99)]))
+
+threshold = 4
+above = test_scores[test_scores > threshold]
+days = above.index.normalize().nunique()
+print(f"soglia={threshold}: {len(above)} campioni, {days} giorni")
+
+above.index = above.index.tz_convert("Europe/Rome")
+# above.to_csv("above.csv")
+
+print(test["residual"].groupby(test["residual"].index.hour).median() / scale)
+print(test["residual"].groupby(test["residual"].index.day_of_week).median() / scale)
+
+print(scale)

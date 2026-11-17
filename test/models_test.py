@@ -57,4 +57,4 @@ def test_readonly_attr():
     z = Zero(scale=2.0, threshold=10.0)
 
     with pytest.raises(AttributeError):
-        z.threshold = 5
+        z.threshold = 5  # type: ignore

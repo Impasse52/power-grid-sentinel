@@ -4,9 +4,9 @@ import time
 import pandas as pd
 from confluent_kafka import Producer
 
-from shared.schemas import LoadSample, Source
+from src.shared.schemas import LoadSample, Source
 
-SPEED = 60
+SPEED = 60 / 1000
 replay_file = "data/processed/terna_load.parquet"
 df = pd.read_parquet(replay_file)
 
