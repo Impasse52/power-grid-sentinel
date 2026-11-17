@@ -6,12 +6,12 @@ from confluent_kafka import Producer
 
 from src.shared.schemas import LoadSample, Source
 
-SPEED = 60 / 1000
+SPEED = 60 / 100
 replay_file = "data/processed/terna_load.parquet"
 df = pd.read_parquet(replay_file)
 
 p = Producer(
-    {"bootstrap.servers": os.environ.get("redpanda_address", " localhost:19092")}
+    {"bootstrap.servers": os.environ.get("REDPANDA_ADDRESS", "localhost:19092")}
 )
 
 for ts, load, forecast, is_missing in zip(
@@ -29,7 +29,7 @@ for ts, load, forecast, is_missing in zip(
     )
 
     p.produce("terna.load", key="IT", value=value.model_dump_json())
-    print("sent")
+    print(f"Sent: {value}")
     p.poll(0)
     time.sleep(SPEED)
 

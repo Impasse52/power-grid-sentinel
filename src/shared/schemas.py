@@ -55,3 +55,30 @@ class LoadSample(_Base):
             )
 
         return self
+
+
+class ScoreResult(_Base):
+    ts_utc: datetime
+    load_mw: float | None = Field(ge=0.0, allow_inf_nan=False)
+    forecast_mw: float | None = Field(ge=0.0, allow_inf_nan=False)
+    score: float | None = Field(ge=0.0, allow_inf_nan=False)
+    threshold: float | None = Field(ge=0.0, allow_inf_nan=False)
+    is_anomaly: bool
+    is_missing: bool
+    model_version: str
+
+    @field_validator("ts_utc")
+    @classmethod
+    def _ts(cls, value: datetime) -> datetime:
+        return _check_utc(value)
+
+    @model_validator(mode="after")
+    def _coherent(self) -> "ScoreResult":
+        is_incomplete = self.load_mw is None or self.forecast_mw is None
+
+        if self.is_missing != is_incomplete:
+            raise ValueError(
+                "is_missing can only be True if load_mw or forecast_mw are None"
+            )
+
+        return self

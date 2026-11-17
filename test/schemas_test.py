@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 import pytest
 from pydantic import ValidationError
 
-from src.shared.schemas import LoadSample
+from src.shared.schemas import LoadSample, ScoreResult
 
 T0 = datetime(2024, 1, 1, 0, 0, tzinfo=UTC)
 
@@ -33,4 +33,18 @@ def test_naive_timestamp_rejected():
             forecast_mw=1,
             is_missing=False,
             source="replay",
+        )
+
+
+def test_naive_timestamp_rejected_in_score():
+    with pytest.raises(ValidationError):
+        ScoreResult(
+            ts_utc=datetime(2024, 1, 1),
+            load_mw=1,
+            forecast_mw=1,
+            is_missing=False,
+            score=0.0,
+            threshold=0.0,
+            is_anomaly=False,
+            model_version="",
         )
