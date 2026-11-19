@@ -43,7 +43,7 @@ try:
         raw = msg.value()
 
         try:
-            sample = LoadSample.model_validate_json(raw)
+            sample = LoadSample.model_validate_json(raw)  # type: ignore
         except ValidationError as e:
             print(f"ValidationError for sample: {raw!r}\n{e}")
             break
