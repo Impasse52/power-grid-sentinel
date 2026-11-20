@@ -57,10 +57,21 @@ class LoadSample(_Base):
         return self
 
 
-class ScoreResult(_Base):
+class ScoreRequest(_Base):
+    samples: list[LoadSample] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def _consecutive(self) -> "ScoreRequest":
+        for i, j in zip(self.samples, self.samples[1:]):
+            if j.ts_utc - i.ts_utc != timedelta(minutes=15):
+                raise ValueError("Timestamps must be consecutive with a step of 15 min")
+
+        return self
+
+
+class ScoreResponse(_Base):
+    schema_version: int
     ts_utc: datetime
-    load_mw: float | None = Field(ge=0.0, allow_inf_nan=False)
-    forecast_mw: float | None = Field(ge=0.0, allow_inf_nan=False)
     score: float | None = Field(ge=0.0, allow_inf_nan=False)
     threshold: float | None = Field(ge=0.0, allow_inf_nan=False)
     is_anomaly: bool
@@ -71,6 +82,11 @@ class ScoreResult(_Base):
     @classmethod
     def _ts(cls, value: datetime) -> datetime:
         return _check_utc(value)
+
+
+class ScoreResult(ScoreResponse):
+    load_mw: float | None = Field(ge=0.0, allow_inf_nan=False)
+    forecast_mw: float | None = Field(ge=0.0, allow_inf_nan=False)
 
     @model_validator(mode="after")
     def _coherent(self) -> "ScoreResult":

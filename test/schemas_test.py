@@ -1,9 +1,9 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from pydantic import ValidationError
 
-from src.shared.schemas import LoadSample, ScoreResult
+from src.shared.schemas import LoadSample, ScoreRequest, ScoreResult, Source
 
 T0 = datetime(2024, 1, 1, 0, 0, tzinfo=UTC)
 
@@ -47,4 +47,29 @@ def test_naive_timestamp_rejected_in_score():
             threshold=0.0,
             is_anomaly=False,
             model_version="",
+        )
+
+
+def test_scorerequest_wrongstep_fails():
+    ts = datetime.now(UTC)
+    with pytest.raises(ValidationError):
+        ScoreRequest(
+            samples=[
+                LoadSample(
+                    schema_version=1,
+                    ts_utc=ts,
+                    load_mw=1.0,
+                    forecast_mw=1.0,
+                    is_missing=0,
+                    source=Source.REPLAY,
+                ),
+                LoadSample(
+                    schema_version=1,
+                    ts_utc=ts + timedelta(minutes=14),
+                    load_mw=1.0,
+                    forecast_mw=1.0,
+                    is_missing=0,
+                    source=Source.REPLAY,
+                ),
+            ]
         )
